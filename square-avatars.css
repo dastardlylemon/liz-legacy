@@ -1,0 +1,14 @@
+.DashboardProfileCard-avatarImage,
+.ProfileCard-avatarImage,
+.ProfileAvatar-image,
+.ProfileAvatar-placeholderImage,
+.ProfileListItem-avatar,
+.ProfileCardMini-avatarImage,
+.nav .session .dropdown-toggle,
+.avatar--circular,
+.Avatar,
+.DMAvatar,
+.ProfileAvatar,
+.avatar {
+  border-radius: 5px !important;
+}

@@ -1,0 +1,3 @@
+.stream-item[data-suggestion-json*="ActivityTweet"] {
+  display: none;
+}

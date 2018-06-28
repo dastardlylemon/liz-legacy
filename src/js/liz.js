@@ -1,6 +1,6 @@
 function insertStyles(type) {
-  var link = document.createElement('link');
-  link.href = chrome.runtime.getURL(type + '.css');
+  let link = document.createElement('link');
+  link.href = chrome.runtime.getURL(`css/${type}.css`);
   link.type = 'text/css';
   link.rel = 'stylesheet';
   document.documentElement.insertBefore(link, null);

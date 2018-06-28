@@ -1,0 +1,62 @@
+.AdaptiveMediaOuterContainer {
+  display: inline-block;
+
+  .AdaptiveMedia {
+    border-radius: 0 !important;
+
+    &.is-square {
+      height: 100px;
+      width: 100px;
+    }
+
+    &-container {
+      height: 100% !important;
+
+      img {
+        height: 100px;
+        width: 100px;
+        object-fit: cover;
+        top: 0 !important;
+        left: 0 !important;
+        border-radius: 5px;
+      }
+    }
+
+    &-photoContainer {
+      width: 100px !important;
+    }
+
+    &-doublePhoto {
+      height: 100px !important;
+      width: auto !important;
+
+      .AdaptiveMedia-halfWidthPhoto {
+        width: 100px !important;
+        margin-right: 10px !important;
+      }
+    }
+
+    &-triplePhoto,
+    &-quadPhoto {
+      height: 100px !important;
+
+      .AdaptiveMedia-threeQuartersWidthPhoto,
+      .AdaptiveMedia-twoThirdsWidthPhoto {
+        width: 100px !important;
+        margin-right: 10px !important;
+      }
+
+      .AdaptiveMedia-thirdHeightPhotoContainer,
+      .AdaptiveMedia-halfHeightPhotoContainer {
+        display: inline-flex !important;
+
+        .AdaptiveMedia-thirdHeightPhoto,
+        .AdaptiveMedia-halfHeightPhoto {
+          height: 100px !important;
+          overflow: visible !important;
+          margin-right: 10px !important;
+        }
+      }
+    }
+  }
+}

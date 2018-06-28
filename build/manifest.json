@@ -10,15 +10,11 @@
       "matches": [
         "*://*.twitter.com/*"
       ],
-      "js": ["liz.js"],
+      "js": ["liz-bundle.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
-    "square-avatars.css",
-    "hide-moments.css",
-    "liked-tweets.css",
-    "small-media.css",
-    "show-links.css"
+    "css/*.css"
   ]
 }

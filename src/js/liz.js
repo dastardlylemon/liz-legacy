@@ -1,3 +1,6 @@
+import $ from 'jquery';
+import _ from 'underscore';
+
 function insertStyles(type) {
   let link = document.createElement('link');
   link.href = chrome.runtime.getURL(`css/${type}.css`);

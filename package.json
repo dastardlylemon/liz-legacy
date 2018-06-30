@@ -8,8 +8,8 @@
     "watch-js": "webpack --watch",
     "build-sass": "node-sass src/scss/ -o build/css/",
     "watch-sass": "node-sass -w src/scss/ -o build/css/",
-    "build": "npm run build-js && npm run build-sass",
-    "watch": "npm run watch-js && npm run watch-sass"
+    "build": "npm run build-js & npm run build-sass",
+    "watch": "npm run watch-js & npm run watch-sass"
   },
   "author": "dastardlylemon",
   "license": "ISC",

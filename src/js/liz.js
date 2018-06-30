@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import _ from 'underscore';
+import * as twitter from 'twitter-text';
 
 function insertStyles(type) {
   let link = document.createElement('link');
@@ -23,9 +24,23 @@ function convertLinks(context) {
   });
 }
 
+function getWeightedLength() {
+  const tweetText = $('.timeline-tweet-box .tweet-box-shadow').val();
+  const { weightedLength } = twitter.parseTweet(tweetText);
+  return weightedLength;
+}
+
+function insertTweetCounter() {
+  let counter = $('<div/>', {
+    class: 'liz-character-counter'
+  });
+  counter.text(280 - getWeightedLength());
+  counter.insertBefore($('.js-character-counter'));
+}
+
 $(document).ready(() => {
   convertLinks($('#stream-items-id'));
-  const observer = new MutationObserver((mutations) => {
+  const timelineObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.addedNodes !== null) {
         convertLinks($(mutation.addedNodes));
@@ -39,7 +54,25 @@ $(document).ready(() => {
     subtree: false
   };
 
-  observer.observe($('#stream-items-id')[0], config);
+  timelineObserver.observe($('#stream-items-id')[0], config);
+
+  insertTweetCounter();
+  const composerObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      window.setTimeout(() => {
+        $('.liz-character-counter').text(280 - getWeightedLength());
+      }, 100);
+    });
+  });
+
+  const config2 = {
+    characterData: true,
+    attributes: false,
+    childList: false,
+    subtree: true
+  };
+
+  composerObserver.observe($('#tweet-box-home-timeline')[0], config2);
 });
 
 // also eventually hidden divs from the DOM

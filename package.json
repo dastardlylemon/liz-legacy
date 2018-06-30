@@ -8,7 +8,7 @@
     "watch-js": "webpack --watch",
     "build-sass": "node-sass src/scss/ -o build/css/",
     "watch-sass": "node-sass -w src/scss/ -o build/css/",
-    "build": "npm run build-js & npm run build-sass",
+    "build": "npm run build-js && npm run build-sass",
     "watch": "npm run watch-js & npm run watch-sass"
   },
   "author": "dastardlylemon",
@@ -19,6 +19,7 @@
     "babel-preset-env": "^1.7.0",
     "jquery": "^3.3.1",
     "node-sass": "^4.9.0",
+    "twitter-text": "^2.0.4",
     "underscore": "^1.9.1",
     "webpack": "^4.12.2",
     "webpack-cli": "^3.0.8"

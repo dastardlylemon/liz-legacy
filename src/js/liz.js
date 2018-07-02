@@ -10,6 +10,7 @@ const liz = {
   registeredStyles: [
     'square-avatars',
     'hide-moments',
+    'hide-who-to-follow',
     'liked-tweets',
     'small-media',
     'show-links',

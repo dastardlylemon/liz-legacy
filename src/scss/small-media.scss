@@ -3,6 +3,7 @@
 
   .AdaptiveMedia {
     border-radius: 0 !important;
+    border: none !important;
 
     &.is-square {
       height: 100px;
@@ -24,6 +25,7 @@
 
     &-photoContainer {
       width: 100px !important;
+      background-color: rgba(0,0,0,0) !important;
     }
 
     &-doublePhoto {

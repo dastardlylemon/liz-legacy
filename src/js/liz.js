@@ -2,77 +2,111 @@ import $ from 'jquery';
 import _ from 'underscore';
 import * as twitter from 'twitter-text';
 
-function insertStyles(type) {
-  let link = document.createElement('link');
-  link.href = chrome.runtime.getURL(`css/${type}.css`);
-  link.type = 'text/css';
-  link.rel = 'stylesheet';
-  document.documentElement.insertBefore(link, null);
-}
+const liz = {
+  MAX_TWEET_LENGTH: 280,
 
-insertStyles('square-avatars');
-insertStyles('hide-moments');
-insertStyles('liked-tweets');
-insertStyles('small-media');
-insertStyles('show-links');
+  composerText: '',
 
-function convertLinks(context) {
-  let links = context.find('.twitter-timeline-link[data-expanded-url]');
-  links.each(function() {
-    const sourceUrl = $(this).data('expanded-url');
-    $(this).attr('href', sourceUrl);
-  });
-}
+  registeredStyles: [
+    'square-avatars',
+    'hide-moments',
+    'liked-tweets',
+    'small-media',
+    'show-links',
+    'show-counter'
+  ],
 
-function getWeightedLength() {
-  const tweetText = $('.timeline-tweet-box .tweet-box-shadow').val();
-  const { weightedLength } = twitter.parseTweet(tweetText);
-  return weightedLength;
-}
+  registeredObservers: {
+    'timeline': [],
+    'composer': []
+  },
 
-function insertTweetCounter() {
-  let counter = $('<div/>', {
-    class: 'liz-character-counter'
-  });
-  counter.text(280 - getWeightedLength());
-  counter.insertBefore($('.js-character-counter'));
-}
+  insertStyles: function() {
+    _.each(this.registeredStyles, (style) => {
+      let link = document.createElement('link');
+      link.href = chrome.runtime.getURL(`css/${style}.css`);
+      link.type = 'text/css';
+      link.rel = 'stylesheet';
+      document.documentElement.insertBefore(link, null);
+    });
+  },
+
+  registerStyle: function(style) {
+    this.registeredStyles.push(style);
+  },
+
+  registerObserver: function(type, callback) {
+    this.registeredObservers[type].push(callback);
+  },
+
+  initializeObserver: function(context, type, config) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        _.each(this.registeredObservers[type], (callback) => {
+          callback.call(this, mutation);
+        });
+      });
+    });
+    observer.observe(context, config);
+  },
+
+  convertLinks: function(context) {
+    const links = context.find('.twitter-timeline-link[data-expanded-url]');
+    links.each(function() {
+      const sourceUrl = $(this).data('expanded-url');
+      $(this).attr('href', sourceUrl);
+    });
+  },
+
+  convertLinksCallback: function(mutation) {
+    if (mutation.addedNodes !== null) {
+      this.convertLinks($(mutation.addedNodes));
+    }
+  },
+
+  updateTweetCounter: function() {
+    const tweetText = $('#tweet-box-home-timeline').text();
+    if (tweetText !== this.composerText) {
+      const { weightedLength } = twitter.parseTweet(tweetText);
+      this.counter.text(this.MAX_TWEET_LENGTH - weightedLength);
+      this.composerText = tweetText;
+      this.counter.toggleClass('maxReached', weightedLength >= this.MAX_TWEET_LENGTH);
+    }
+  },
+
+  insertTweetCounter: function() {
+    const counterEl = $('<div/>', {
+      class: 'liz-character-counter'
+    });
+    counterEl.insertBefore($('.js-character-counter'));
+    this.counter = $('.liz-character-counter');
+    this.updateTweetCounter();
+  },
+
+  onReady: function() {
+    this.convertLinks($('#stream-items-id'));
+    this.registerObserver('timeline', this.convertLinksCallback);
+    this.initializeObserver($('#stream-items-id')[0], 'timeline', {
+      attributes: false,
+      childList: true,
+      subtree: false
+    });
+
+    this.insertTweetCounter();
+    this.registerObserver('composer', this.updateTweetCounter);
+    this.initializeObserver($('#tweet-box-home-timeline')[0], 'composer', {
+      characterData: true,
+      attributes: false,
+      childList: true,
+      subtree: true
+    });
+  }
+};
+
+liz.insertStyles();
 
 $(document).ready(() => {
-  convertLinks($('#stream-items-id'));
-  const timelineObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.addedNodes !== null) {
-        convertLinks($(mutation.addedNodes));
-      }
-    });
-  });
-
-  const config = {
-    attributes: false,
-    childList: true,
-    subtree: false
-  };
-
-  timelineObserver.observe($('#stream-items-id')[0], config);
-
-  insertTweetCounter();
-  const composerObserver = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      window.setTimeout(() => {
-        $('.liz-character-counter').text(280 - getWeightedLength());
-      }, 100);
-    });
-  });
-
-  const config2 = {
-    characterData: true,
-    attributes: false,
-    childList: false,
-    subtree: true
-  };
-
-  composerObserver.observe($('#tweet-box-home-timeline')[0], config2);
+  liz.onReady.call(liz);
 });
 
 // also eventually hidden divs from the DOM

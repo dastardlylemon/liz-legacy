@@ -68,35 +68,44 @@ const liz = {
     }
   },
 
-  updateTweetCounter: function() {
-    const tweetText = $('#tweet-box-home-timeline').text();
-    if (tweetText !== this.composerText) {
-      const { weightedLength } = twitter.parseTweet(tweetText);
-      this.counter.text(this.MAX_TWEET_LENGTH - weightedLength);
-      this.composerText = tweetText;
-      this.counter.toggleClass('maxReached', weightedLength >= this.MAX_TWEET_LENGTH);
+  updateTweetCounter: function(mutation) {
+    if (mutation.target.parentElement) {
+      const tweetText = $('#tweet-box-home-timeline').text();
+      if (tweetText !== this.composerText) {
+        let composer = $(mutation.target.parentElement).closest('.RichEditor-container');
+        let counter = composer.find('.liz-character-counter');
+        const { weightedLength } = twitter.parseTweet(tweetText);
+        counter.text(this.MAX_TWEET_LENGTH - weightedLength);
+        this.composerText = tweetText;
+        counter.toggleClass('maxReached', weightedLength >= this.MAX_TWEET_LENGTH);
+      }
     }
   },
 
-  insertTweetCounter: function() {
-    const counterEl = $('<div/>', {
-      class: 'liz-character-counter'
-    });
-    counterEl.insertBefore($('.js-character-counter'));
-    this.counter = $('.liz-character-counter');
-    this.updateTweetCounter();
+  insertTweetCounter: function(context) {
+    if (!context.hasClass('liz-initialized')) {
+      const counterEl = $('<div/>', {
+        class: 'liz-character-counter'
+      });
+      counterEl.insertBefore(
+        context.closest('.RichEditor-container').find('.js-character-counter')
+      );
+      context.addClass('liz-initialized');
+    }
   },
 
   initializeHomePage: function() {
-    this.convertLinks($('#stream-items-id'));
-    this.initializeObserver($('#stream-items-id')[0], 'timeline', {
+    const timeline = $('#stream-items-id');
+    this.convertLinks(timeline);
+    this.initializeObserver(timeline[0], 'timeline', {
       attributes: false,
       childList: true,
       subtree: false
     });
 
-    this.insertTweetCounter();
-    this.initializeObserver($('#tweet-box-home-timeline')[0], 'composer', {
+    const composer = $('#tweet-box-home-timeline');
+    this.insertTweetCounter(composer);
+    this.initializeObserver(composer[0], 'composer', {
       characterData: true,
       attributes: false,
       childList: true,
@@ -116,7 +125,6 @@ const liz = {
           this.activeObservers = [];
 
           if (message.url === 'https://twitter.com/') {
-            console.log('init home page');
             this.initializeHomePage();
           }
         }

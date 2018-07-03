@@ -4,17 +4,22 @@
   "version": "0.1",
 
   "description": "and the blue bird",
-
+  "background": {
+    "scripts": ["background.js"]
+  },
   "content_scripts": [
     {
       "matches": [
         "*://*.twitter.com/*"
       ],
-      "js": ["liz-bundle.js"],
+      "js": ["liz.js"],
       "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [
     "css/*.css"
+  ],
+  "permissions": [
+    "tabs"
   ]
 }

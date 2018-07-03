@@ -22,6 +22,8 @@ const liz = {
     'composer': []
   },
 
+  activeObservers: [],
+
   insertStyles: function() {
     _.each(this.registeredStyles, (style) => {
       let link = document.createElement('link');
@@ -49,6 +51,7 @@ const liz = {
       });
     });
     observer.observe(context, config);
+    this.activeObservers.push(observer);
   },
 
   convertLinks: function(context) {
@@ -84,9 +87,8 @@ const liz = {
     this.updateTweetCounter();
   },
 
-  onReady: function() {
+  initializeHomePage: function() {
     this.convertLinks($('#stream-items-id'));
-    this.registerObserver('timeline', this.convertLinksCallback);
     this.initializeObserver($('#stream-items-id')[0], 'timeline', {
       attributes: false,
       childList: true,
@@ -94,13 +96,36 @@ const liz = {
     });
 
     this.insertTweetCounter();
-    this.registerObserver('composer', this.updateTweetCounter);
     this.initializeObserver($('#tweet-box-home-timeline')[0], 'composer', {
       characterData: true,
       attributes: false,
       childList: true,
       subtree: true
     });
+
+    $('.ProfileCardStats-statValue').each(function() {
+      $(this).text($(this).data('count').toLocaleString());
+    });
+  },
+
+  onReady: function() {
+    chrome.runtime.onMessage.addListener(
+      (message, callback) => {
+        if (message.type === 'update:url') {
+          _.invoke(this.activeObservers, 'disconnect');
+          this.activeObservers = [];
+
+          if (message.url === 'https://twitter.com/') {
+            console.log('init home page');
+            this.initializeHomePage();
+          }
+        }
+      }
+    );
+
+    this.registerObserver('timeline', this.convertLinksCallback);
+    this.registerObserver('composer', this.updateTweetCounter);
+    this.initializeHomePage();
   }
 };
 

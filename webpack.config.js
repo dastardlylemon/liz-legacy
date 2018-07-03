@@ -2,10 +2,13 @@ const path = require('path');
 
 module.exports = {
   mode: 'development',
-  entry: './src/js/liz.js',
+  entry: {
+    liz: "./src/js/liz.js",
+    background: "./src/js/background.js"
+  },
   output: {
     path: path.resolve(__dirname, 'build'),
-    filename: 'liz-bundle.js'
+    filename: "[name].js"
   },
   module: {
     rules: [

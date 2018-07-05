@@ -4,6 +4,7 @@ import * as twitter from 'twitter-text';
 
 const liz = {
   MAX_TWEET_LENGTH: 280,
+  INITIALIZED_CLASS: 'liz-initialized',
 
   composerText: '',
 
@@ -70,27 +71,27 @@ const liz = {
 
   updateTweetCounter: function(mutation) {
     if (mutation.target.parentElement) {
-      const tweetText = $('#tweet-box-home-timeline').text();
-      if (tweetText !== this.composerText) {
-        let composer = $(mutation.target.parentElement).closest('.RichEditor-container');
-        let counter = composer.find('.liz-character-counter');
-        const { weightedLength } = twitter.parseTweet(tweetText);
-        counter.text(this.MAX_TWEET_LENGTH - weightedLength);
-        this.composerText = tweetText;
-        counter.toggleClass('maxReached', weightedLength >= this.MAX_TWEET_LENGTH);
+      const tweetText = $(mutation.target.parentElement).text();
+      let composer = $(mutation.target.parentElement).closest('.RichEditor-container');
+      let counter = composer.find('.liz-character-counter');
+      let { weightedLength } = twitter.parseTweet(tweetText);
+      if (tweetText.trim().length === 0) {
+        weightedLength = 0;
       }
+      counter.text(this.MAX_TWEET_LENGTH - weightedLength);
+      counter.toggleClass('maxReached', weightedLength >= this.MAX_TWEET_LENGTH);
     }
   },
 
   insertTweetCounter: function(context) {
-    if (!context.hasClass('liz-initialized')) {
+    if (!context.hasClass(this.INITIALIZED_CLASS)) {
       const counterEl = $('<div/>', {
         class: 'liz-character-counter'
       });
       counterEl.insertBefore(
         context.closest('.RichEditor-container').find('.js-character-counter')
       );
-      context.addClass('liz-initialized');
+      context.addClass(this.INITIALIZED_CLASS);
     }
   },
 
@@ -117,15 +118,35 @@ const liz = {
     });
   },
 
+  initializeTweetDetailPage: function() {
+    const path = window.location.pathname;
+    const tweetId = path.split('/').pop();
+
+    const composer = $(`#tweet-box-reply-to-${tweetId}`);
+    console.log(composer);
+    this.insertTweetCounter(composer);
+    this.initializeObserver(composer[0], 'composer', {
+      characterData: true,
+      attributes: false,
+      childList: true,
+      subtree: true
+    });
+  },
+
   onReady: function() {
     chrome.runtime.onMessage.addListener(
       (message, callback) => {
         if (message.type === 'update:url') {
           _.invoke(this.activeObservers, 'disconnect');
           this.activeObservers = [];
+          console.log('HELLO', message.url);
 
-          if (message.url === 'https://twitter.com/') {
+          if (/twitter\.com\/$/.test(message.url)) {
             this.initializeHomePage();
+          } else if (/twitter\.com\/[a-zA-Z0-9_]+\/status\/\d+$/.test(message.url)) {
+            this.initializeTweetDetailPage();
+          } else {
+            console.log('all patterns failed');
           }
         }
       }

@@ -95,6 +95,17 @@ const liz = {
     }
   },
 
+  initializeGeneral: function() {
+    const composer = $('#tweet-box-global');
+    this.insertTweetCounter(composer);
+    this.initializeObserver(composer[0], 'composer', {
+      characterData: true,
+      attributes: false,
+      childList: true,
+      subtree: true
+    });
+  },
+
   initializeHomePage: function() {
     const timeline = $('#stream-items-id');
     this.convertLinks(timeline);
@@ -123,7 +134,6 @@ const liz = {
     const tweetId = path.split('/').pop();
 
     const composer = $(`#tweet-box-reply-to-${tweetId}`);
-    console.log(composer);
     this.insertTweetCounter(composer);
     this.initializeObserver(composer[0], 'composer', {
       characterData: true,
@@ -140,6 +150,7 @@ const liz = {
           _.invoke(this.activeObservers, 'disconnect');
           this.activeObservers = [];
           console.log('HELLO', message.url);
+          this.initializeGeneral();
 
           if (/twitter\.com\/$/.test(message.url)) {
             this.initializeHomePage();
@@ -154,6 +165,7 @@ const liz = {
 
     this.registerObserver('timeline', this.convertLinksCallback);
     this.registerObserver('composer', this.updateTweetCounter);
+    this.initializeGeneral();
     this.initializeHomePage();
   }
 };

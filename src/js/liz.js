@@ -2,6 +2,9 @@ import $ from 'jquery';
 import _ from 'underscore';
 import * as twitter from 'twitter-text';
 
+import settingsTab from '../templates/settings-tab.template';
+import settingsPanel from '../templates/settings-panel.template';
+
 const liz = {
   MAX_TWEET_LENGTH: 280,
   INITIALIZED_CLASS: 'liz-initialized',
@@ -9,6 +12,7 @@ const liz = {
   composerText: '',
 
   registeredStyles: [
+    'settings',
     'square-avatars',
     'hide-moments',
     'hide-who-to-follow',
@@ -95,6 +99,14 @@ const liz = {
     }
   },
 
+  insertSettingsTab: function(active = false) {
+    let settingsNav = $('#settings_nav .js-nav-links');
+    if (!settingsNav.hasClass(this.INITIALIZED_CLASS)) {
+      settingsNav.append(settingsTab(active));
+      settingsNav.addClass(this.INITIALIZED_CLASS);
+    }
+  },
+
   initializeGeneral: function() {
     const composer = $('#tweet-box-global');
     this.insertTweetCounter(composer);
@@ -143,6 +155,25 @@ const liz = {
     });
   },
 
+  initializeSettingsPage: function() {
+    this.insertSettingsTab();
+    const lizTab = $('#liz_dashboard_nav');
+    $('#page-container').append(settingsPanel());
+    $('.js-nav-links li').on('click', (e) => {
+      if ($(e.currentTarget).is('#liz_dashboard_nav')) {
+        e.preventDefault();
+        $('li.active').removeClass('active');
+        lizTab.addClass('active');
+        $('.content-main').hide();
+        $('.liz-settings').show();
+      } else {
+        lizTab.removeClass('active');
+        $('.content-main').show();
+        $('.liz-settings').hide();
+      }
+    });
+  },
+
   onReady: function() {
     chrome.runtime.onMessage.addListener(
       (message, callback) => {
@@ -156,6 +187,8 @@ const liz = {
             this.initializeHomePage();
           } else if (/twitter\.com\/[a-zA-Z0-9_]+\/status\/\d+$/.test(message.url)) {
             this.initializeTweetDetailPage();
+          } else if (/twitter\.com\/settings\/[a-zA-Z0-9_]+/.test(message.url)) {
+            this.initializeSettingsPage();
           } else {
             console.log('all patterns failed');
           }
@@ -166,7 +199,8 @@ const liz = {
     this.registerObserver('timeline', this.convertLinksCallback);
     this.registerObserver('composer', this.updateTweetCounter);
     this.initializeGeneral();
-    this.initializeHomePage();
+    // this.initializeHomePage();
+    this.initializeSettingsPage();
   }
 };
 

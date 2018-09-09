@@ -17,6 +17,7 @@ const liz = {
     'hide-moments',
     'hide-who-to-follow',
     'liked-tweets',
+    'promoted-tweets',
     'small-media',
     'show-links',
     'show-counter'
@@ -187,7 +188,7 @@ const liz = {
             this.initializeHomePage();
           } else if (/twitter\.com\/[a-zA-Z0-9_]+\/status\/\d+$/.test(message.url)) {
             this.initializeTweetDetailPage();
-          } else if (/twitter\.com\/settings\/[a-zA-Z0-9_]+/.test(message.url)) {
+          } else if (/twitter\.com\/(settings|who_to_follow)\/[a-zA-Z0-9_]+/.test(message.url)) {
             this.initializeSettingsPage();
           } else {
             console.log('all patterns failed');
@@ -199,8 +200,8 @@ const liz = {
     this.registerObserver('timeline', this.convertLinksCallback);
     this.registerObserver('composer', this.updateTweetCounter);
     this.initializeGeneral();
-    // this.initializeHomePage();
-    this.initializeSettingsPage();
+    this.initializeHomePage();
+    // this.initializeSettingsPage();
   }
 };
 
